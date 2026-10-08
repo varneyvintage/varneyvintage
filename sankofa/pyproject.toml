@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sankofa"
+version = "0.1.0"
+description = "Africa-focused commodities trading bot: copy-trade signals + news/social sentiment + macro regime, paper-trading by default."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+  "pyyaml>=6.0",
+  "requests>=2.31",
+  "feedparser>=6.0",
+  "vaderSentiment>=3.3",
+  "pandas>=2.0",
+  "numpy>=1.26",
+  "yfinance>=0.2.40",
+  "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+alpaca = ["alpaca-py>=0.20"]
+ibkr = ["ib_async>=1.0"]
+x = ["tweepy>=4.14"]
+webhook = ["fastapi>=0.110", "uvicorn>=0.29"]
+nlp = ["transformers>=4.40", "torch>=2.2"]
+dev = ["pytest>=8.0", "ruff>=0.4"]
+
+[project.scripts]
+sankofa = "sankofa.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sankofa*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff.lint]
+# Default rule set; a long-running bot deliberately catches broad exceptions at loop boundaries.
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E501"]

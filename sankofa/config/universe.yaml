@@ -1,0 +1,234 @@
+# Instrument universe.
+#
+# HONEST NOTE ON "AFRICAN FUTURES": most African-exchange-listed futures (e.g. JSE/SAFEX
+# agricultural contracts in South Africa, or the Ethiopia Commodity Exchange) have little or
+# no retail-accessible algorithmic API. I could not verify a working retail API for any of
+# them. The practical route is Africa-LINKED instruments listed on Western exchanges where
+# Africa is a dominant producer or where the instrument is a direct Africa exposure.
+#
+# Every "data_symbol" below is a Yahoo Finance style symbol used for free market data.
+# "verified: false" means: check the symbol and the broker contract spec yourself before
+# any live order. Production-share figures are approximate, from general knowledge, and
+# should be treated as "needs verification" rather than as cited statistics.
+
+instruments:
+
+  # ---------------- Soft commodities: Africa is a top producer ----------------
+  - id: COCOA
+    name: Cocoa (ICE US)
+    asset_class: futures
+    data_symbol: "CC=F"
+    broker_symbol: { ibkr: "CC", alpaca: null }
+    africa_link:
+      countries: [CI, GH, NG, CM]
+      note: "Cote d'Ivoire and Ghana supply roughly 55-65% of world cocoa (approximate; verify)."
+      producer_benefits_from_rally: true
+    keywords: [cocoa, cacao, "ivory coast", "cote d'ivoire", ghana cocobod, cocobod, "ghana cocoa", swollen shoot, harmattan]
+    verified: false
+
+  - id: COFFEE
+    name: Coffee C (ICE US, arabica)
+    asset_class: futures
+    data_symbol: "KC=F"
+    broker_symbol: { ibkr: "KC", alpaca: null }
+    africa_link:
+      countries: [ET, UG, KE, TZ, RW]
+      note: "Ethiopia and Uganda are major arabica/robusta exporters; smaller global share than cocoa."
+      producer_benefits_from_rally: true
+    keywords: [coffee, arabica, robusta, "ethiopia coffee", "uganda coffee", "kenya coffee", sidamo, yirgacheffe]
+    verified: false
+
+  - id: COTTON
+    name: Cotton No.2 (ICE US)
+    asset_class: futures
+    data_symbol: "CT=F"
+    broker_symbol: { ibkr: "CT", alpaca: null }
+    africa_link:
+      countries: [BJ, ML, BF, CI, CM]
+      note: "West African 'C4' cotton belt is a meaningful exporter."
+      producer_benefits_from_rally: true
+    keywords: [cotton, "burkina faso cotton", "benin cotton", "mali cotton", sofitex]
+    verified: false
+
+  - id: SUGAR
+    name: Sugar No.11 (ICE US)
+    asset_class: futures
+    data_symbol: "SB=F"
+    broker_symbol: { ibkr: "SB", alpaca: null }
+    africa_link:
+      countries: [ZA, EG, SZ, SD]
+      note: "South Africa, Eswatini, Egypt and Sudan produce sugar; Africa overall is a net importer."
+      producer_benefits_from_rally: false
+    keywords: [sugar, "south africa sugar", tongaat, illovo]
+    verified: false
+
+  # ---------------- Grains: proxy for African food security ----------------
+  - id: MAIZE
+    name: Corn (CBOT) - proxy for African white/yellow maize
+    asset_class: futures
+    data_symbol: "ZC=F"
+    broker_symbol: { ibkr: "ZC", alpaca: null }
+    africa_link:
+      countries: [ZA, NG, ET, TZ, KE, ZM, MW]
+      note: "SAFEX white maize is the real African contract but has no verified retail API; CBOT corn is the liquid proxy."
+      producer_benefits_from_rally: false
+    keywords: [maize, corn, "white maize", safex, "grain sa", "el nino southern africa", "southern africa drought"]
+    verified: false
+
+  - id: WHEAT
+    name: Wheat (CBOT)
+    asset_class: futures
+    data_symbol: "ZW=F"
+    broker_symbol: { ibkr: "ZW", alpaca: null }
+    africa_link:
+      countries: [EG, NG, DZ, MA, ET]
+      note: "Egypt is among the world's largest wheat importers; Africa is net short wheat."
+      producer_benefits_from_rally: false
+    keywords: [wheat, "egypt wheat", gasc, mostakbal misr, "black sea grain", "nigeria wheat"]
+    verified: false
+
+  # ---------------- Precious & PGMs: Southern Africa ----------------
+  - id: GOLD
+    name: Gold (COMEX)
+    asset_class: futures
+    data_symbol: "GC=F"
+    broker_symbol: { ibkr: "GC", alpaca: null }
+    africa_link:
+      countries: [GH, ZA, ML, BF, SD, TZ, CD]
+      note: "Ghana, Mali, Burkina Faso, Sudan, South Africa are top-20 gold producers."
+      producer_benefits_from_rally: true
+    keywords: [gold, bullion, "ghana gold", "mali gold", "barrick mali", "loulo-gounkoto", "south africa gold", "harmony gold", "gold fields", anglogold]
+    verified: false
+
+  - id: PLATINUM
+    name: Platinum (NYMEX)
+    asset_class: futures
+    data_symbol: "PL=F"
+    broker_symbol: { ibkr: "PL", alpaca: null }
+    africa_link:
+      countries: [ZA, ZW]
+      note: "South Africa dominates global platinum mine supply (roughly 70%+; verify)."
+      producer_benefits_from_rally: true
+    keywords: [platinum, pgm, pgms, "bushveld", implats, "impala platinum", amplats, "anglo american platinum", sibanye, "eskom load shedding", "zimbabwe platinum"]
+    verified: false
+
+  - id: PALLADIUM
+    name: Palladium (NYMEX)
+    asset_class: futures
+    data_symbol: "PA=F"
+    broker_symbol: { ibkr: "PA", alpaca: null }
+    africa_link:
+      countries: [ZA, ZW]
+      note: "South Africa is the second largest palladium producer after Russia."
+      producer_benefits_from_rally: true
+    keywords: [palladium, pgm, "south africa pgm", "northam platinum"]
+    verified: false
+
+  # ---------------- Base metals: Copperbelt ----------------
+  - id: COPPER
+    name: Copper (COMEX)
+    asset_class: futures
+    data_symbol: "HG=F"
+    broker_symbol: { ibkr: "HG", alpaca: null }
+    africa_link:
+      countries: [CD, ZM]
+      note: "DRC is the world's No.2 copper producer; Zambia is top-10. Also a cobalt proxy (DRC ~70% of cobalt)."
+      producer_benefits_from_rally: true
+    keywords: [copper, cobalt, "copperbelt", "drc mining", "kamoa", "kamoa-kakula", ivanhoe, "zambia copper", "first quantum", "mopani", "konkola", "lobito corridor", gecamines]
+    verified: false
+
+  # ---------------- Energy: Nigeria/Angola/Libya/Algeria ----------------
+  - id: BRENT
+    name: Brent Crude (ICE)
+    asset_class: futures
+    data_symbol: "BZ=F"
+    broker_symbol: { ibkr: "BZ", alpaca: null }
+    africa_link:
+      countries: [NG, AO, DZ, LY, EG, GA, GQ]
+      note: "Nigeria, Angola, Libya and Algeria are OPEC/OPEC+ producers; Brent is the relevant benchmark for West African grades."
+      producer_benefits_from_rally: true
+    keywords: [brent, crude, opec, "nigeria oil", nnpc, "dangote refinery", "bonny light", "angola oil", "libya oil", "niger delta", "pipeline vandalism", sonangol, sonatrach]
+    verified: false
+
+  # ---------------- FX: the two big African currencies with liquid data ----------------
+  - id: USDZAR
+    name: USD/ZAR (South African rand)
+    asset_class: fx
+    data_symbol: "ZAR=X"
+    broker_symbol: { ibkr: "USD.ZAR", alpaca: null }
+    africa_link:
+      countries: [ZA]
+      note: "Most liquid African currency; trades as a global EM risk proxy."
+      producer_benefits_from_rally: false   # a RALLY in USDZAR = rand WEAKENING
+    keywords: [rand, zar, "south african reserve bank", sarb, "south africa gdp", "eskom", "government of national unity", "gnu south africa", ramaphosa, "south africa budget"]
+    verified: false
+
+  # ---------------- Equities / ETFs: direct Africa exposure via US listings ----------------
+  - id: EZA
+    name: iShares MSCI South Africa ETF
+    asset_class: etf
+    data_symbol: "EZA"
+    broker_symbol: { ibkr: "EZA", alpaca: "EZA" }
+    africa_link:
+      countries: [ZA]
+      note: "Broad South African equity exposure."
+      producer_benefits_from_rally: true
+    keywords: [eza, "south africa stocks", jse, "johannesburg stock exchange", naspers, prosus]
+    verified: false
+
+  - id: GFI
+    name: Gold Fields Ltd (NYSE ADR)
+    asset_class: equity
+    data_symbol: "GFI"
+    broker_symbol: { ibkr: "GFI", alpaca: "GFI" }
+    africa_link:
+      countries: [ZA, GH]
+      note: "South African miner with Ghanaian operations."
+      producer_benefits_from_rally: true
+    keywords: ["gold fields", "south deep", tarkwa, damang]
+    verified: false
+
+  - id: HMY
+    name: Harmony Gold Mining (NYSE ADR)
+    asset_class: equity
+    data_symbol: "HMY"
+    broker_symbol: { ibkr: "HMY", alpaca: "HMY" }
+    africa_link:
+      countries: [ZA]
+      note: "South African gold miner."
+      producer_benefits_from_rally: true
+    keywords: ["harmony gold", "mponeng", "moab khotsong"]
+    verified: false
+
+  - id: SBSW
+    name: Sibanye Stillwater (NYSE ADR)
+    asset_class: equity
+    data_symbol: "SBSW"
+    broker_symbol: { ibkr: "SBSW", alpaca: "SBSW" }
+    africa_link:
+      countries: [ZA]
+      note: "PGM and gold miner."
+      producer_benefits_from_rally: true
+    keywords: [sibanye, stillwater, "sibanye-stillwater"]
+    verified: false
+
+  - id: JMIA
+    name: Jumia Technologies (NYSE ADR)
+    asset_class: equity
+    data_symbol: "JMIA"
+    broker_symbol: { ibkr: "JMIA", alpaca: "JMIA" }
+    africa_link:
+      countries: [NG, EG, KE, MA, CI]
+      note: "Pan-African e-commerce; a sentiment-heavy, high-beta name."
+      producer_benefits_from_rally: true
+    keywords: [jumia, "african e-commerce", "nigeria tech", "naira devaluation"]
+    verified: false
+
+# Macro series used by the regime model (data only, never traded).
+macro_series:
+  DXY:   { data_symbol: "DX-Y.NYB", role: "usd_strength" }
+  US10Y: { data_symbol: "^TNX",     role: "us_rates" }
+  VIX:   { data_symbol: "^VIX",     role: "risk_appetite" }
+  BRENT: { data_symbol: "BZ=F",     role: "energy" }
+  USDZAR: { data_symbol: "ZAR=X",    role: "africa_fx" }
+  EEM:   { data_symbol: "EEM",      role: "em_equity" }

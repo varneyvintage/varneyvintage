@@ -1,0 +1,21 @@
+# systemd unit for a VPS. Copy to /etc/systemd/system/sankofa.service, then:
+#   systemctl daemon-reload && systemctl enable --now sankofa
+[Unit]
+Description=Sankofa trading bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=sankofa
+WorkingDirectory=/opt/sankofa
+EnvironmentFile=/opt/sankofa/.env
+ExecStart=/opt/sankofa/.venv/bin/sankofa run
+Restart=always
+RestartSec=30
+# the bot handles SIGTERM by finishing the current cycle
+KillSignal=SIGTERM
+TimeoutStopSec=120
+
+[Install]
+WantedBy=multi-user.target

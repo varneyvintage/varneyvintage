@@ -1,0 +1,10 @@
+services:
+  sankofa:
+    build: ..
+    restart: unless-stopped
+    env_file: ../.env
+    volumes:
+      - ../state:/app/state
+      - ../config:/app/config:ro
+    ports:
+      - "127.0.0.1:8787:8787"   # copy-trade webhook, loopback only; put it behind a tunnel/reverse proxy

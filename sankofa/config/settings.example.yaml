@@ -1,0 +1,137 @@
+# Copy to config/settings.yaml. Everything here is read at startup.
+
+mode: paper                     # paper | live   (live also requires SANKOFA_LIVE_TRADING_ACK=yes)
+base_currency: USD
+starting_equity: 25000          # paper account size
+loop_interval_minutes: 15       # how often the bot wakes up, re-reads signals and rebalances
+state_dir: state
+universe_file: config/universe.yaml
+
+# ----------------------------------------------------------------------------
+# Risk profile. You asked for a HIGH risk appetite. These numbers are aggressive by
+# normal standards. They are still bounded because an unbounded bot does not survive
+# one bad night. Adjust, but keep the kill switches.
+# ----------------------------------------------------------------------------
+risk:
+  profile: high
+  risk_per_trade_pct: 4.0       # % of equity at risk per position at its stop
+  max_position_pct: 30.0        # % of equity notional in any single instrument
+  max_gross_exposure_pct: 250.0 # total notional / equity (2.5x leverage cap)
+  max_net_exposure_pct: 180.0
+  max_open_positions: 7
+  atr_stop_multiple: 2.5        # stop distance in ATR(14) units
+  daily_loss_kill_pct: 8.0      # stop opening new positions if the day is down this much
+  max_drawdown_kill_pct: 30.0   # flatten everything and halt if peak-to-trough drawdown exceeds this
+  min_signal_conviction: 0.25   # |combined score| below this -> no trade
+  allow_short: true
+
+# ----------------------------------------------------------------------------
+# Pan-African ethos. These are *your* stated values encoded as hard rules the
+# strategy must obey. They are design choices, not claims about what is "right".
+# ----------------------------------------------------------------------------
+ethos:
+  # Only trade instruments with a declared africa_link in the universe.
+  african_linkage_required: true
+  # Tilt: when a signal is long on something whose rally benefits African producers
+  # (cocoa, coffee, gold, PGMs, copper, crude), scale conviction up by this factor.
+  producer_aligned_long_boost: 1.25
+  # Never short the equity of African-domiciled companies or Africa ETFs.
+  no_short_african_equities: true
+  # Never take a position that profits from an African currency weakening
+  # (i.e. no LONG USDZAR). Set false if you want pure alpha.
+  no_short_african_currencies: true
+  # Food staples: do not go LONG grains purely on a food-shock headline
+  # (profiting from African hunger is excluded by design). Technical/copy signals still allowed.
+  no_long_staples_on_food_shock_sentiment: true
+  staple_ids: [MAIZE, WHEAT]
+  # Reporting
+  report_country_exposure: true
+
+# ----------------------------------------------------------------------------
+# Signal weights. Scores from each source are in [-1, 1]; combined score is the
+# weighted sum, then clipped to [-1, 1].
+# ----------------------------------------------------------------------------
+signals:
+  weights:
+    copytrade: 0.45
+    sentiment: 0.20
+    macro: 0.20
+    trend: 0.15
+  # If a source has no fresh data its weight is redistributed to the others.
+  # min_sources: how many distinct fresh sources an instrument needs before it can be traded.
+  # 2 means "trend alone is not enough": a leader, headline flow or the macro regime must agree.
+  min_sources: 2
+  stale_after_minutes:
+    copytrade: 720
+    sentiment: 240
+    macro: 1440
+    trend: 1440
+
+# ----------------------------------------------------------------------------
+# Copy-trading. There is NO verified public API for copying eToro / most social
+# brokers. The bot therefore ingests leader positions through generic adapters:
+#   - file:     drop JSON files into state/copytrade_inbox/  (format in README)
+#   - webhook:  POST JSON to the local webhook server (TradingView alerts, Zapier, your own scraper)
+# "leaders" lets you weight the people you follow. trust decays toward 0.5 if a
+# leader's recorded calls lose money (tracked in state/leader_scores.json).
+# ----------------------------------------------------------------------------
+copytrade:
+  sources: [file, webhook]
+  inbox_dir: state/copytrade_inbox
+  webhook_host: 127.0.0.1
+  webhook_port: 8787
+  webhook_secret: change-me
+  leaders:
+    - { id: "leader_macro_1",  weight: 1.0, note: "e.g. a macro/commodities trader you follow" }
+    - { id: "leader_softs_1",  weight: 0.8, note: "softs specialist" }
+    - { id: "leader_metals_1", weight: 0.8, note: "metals/PGM specialist" }
+  unknown_leader_weight: 0.3
+  # Only copy positions in instruments we can map to our universe.
+  require_universe_match: true
+
+# ----------------------------------------------------------------------------
+# Sentiment / news. RSS is free and reliable. Google News RSS search lets you build
+# a per-topic "scraper" without an API key. X/Twitter is optional and PAID.
+# ----------------------------------------------------------------------------
+sentiment:
+  engine: vader                  # vader | finbert (finbert needs the [nlp] extra and a GPU-less patience)
+  lookback_hours: 24
+  min_mentions: 2                # need at least this many matched items before scoring an instrument
+  rss_feeds:
+    - "http://feeds.bbci.co.uk/news/world/africa/rss.xml"
+    - "https://allafrica.com/tools/headlines/rdf/latest/headlines.rdf"
+  # Each query becomes a Google News RSS feed. Add/remove freely.
+  google_news_queries:
+    - "cocoa prices Ghana Ivory Coast"
+    - "coffee prices Ethiopia Uganda"
+    - "platinum South Africa mining"
+    - "copper DRC Zambia mining"
+    - "Nigeria oil production OPEC"
+    - "South African rand SARB"
+    - "gold mining Ghana Mali"
+    - "Africa commodities"
+  x:
+    enabled: false
+    queries:
+      - "(cocoa OR cacao) (Ghana OR Ivory Coast OR Cote d'Ivoire) -is:retweet lang:en"
+      - "(platinum OR PGM) South Africa -is:retweet lang:en"
+      - "(copper OR cobalt) (DRC OR Zambia OR Congo) -is:retweet lang:en"
+    max_results_per_query: 50
+    # Accounts whose posts count 3x (set to handles you actually trust).
+    boosted_accounts: []
+
+# ----------------------------------------------------------------------------
+# Macro regime.
+# ----------------------------------------------------------------------------
+macro:
+  lookback_days: 60
+  # Instruments get a macro score from their class exposure to: USD strength, rates, risk appetite.
+  class_betas:
+    futures:  { usd_strength: -0.6, us_rates: -0.3, risk_appetite: 0.3 }
+    fx:       { usd_strength:  0.8, us_rates:  0.4, risk_appetite: -0.6 }   # for USDZAR (USD long)
+    etf:      { usd_strength: -0.5, us_rates: -0.4, risk_appetite: 0.8 }
+    equity:   { usd_strength: -0.5, us_rates: -0.4, risk_appetite: 0.8 }
+
+alerts:
+  telegram: false
+  daily_report_hour_utc: 6

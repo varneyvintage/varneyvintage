@@ -1,0 +1,10 @@
+{
+  "leader": "leader_macro_1",
+  "as_of": "2026-10-08T06:00:00Z",
+  "positions": [
+    { "symbol": "CC",     "direction": "long",  "size_pct": 15, "note": "cocoa: mid-crop concerns" },
+    { "symbol": "XAUUSD", "direction": "long",  "size_pct": 20 },
+    { "symbol": "HG",     "direction": "long",  "size_pct": 10 },
+    { "symbol": "BZ",     "direction": "short", "size_pct": 8 }
+  ]
+}
