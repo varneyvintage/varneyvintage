@@ -18,6 +18,7 @@ def project(tmp_path: Path) -> Path:
     raw["sentiment"]["rss_feeds"] = []
     raw["sentiment"]["google_news_queries"] = []
     raw["copytrade"]["sources"] = ["file"]
+    raw["sentiment"]["reddit"]["enabled"] = False
     (tmp_path / "config" / "settings.yaml").write_text(yaml.safe_dump(raw))
     (tmp_path / "state").mkdir()
     return tmp_path

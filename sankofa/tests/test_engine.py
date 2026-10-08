@@ -24,13 +24,13 @@ def test_full_cycle_paper(project, monkeypatch):
     (inbox / "l.json").write_text(json.dumps({"leader": "leader_macro_1", "positions": [
         {"symbol": "CC", "direction": "long", "size_pct": 25},
         {"symbol": "HG", "direction": "long", "size_pct": 20},
-        {"symbol": "GFI", "direction": "short", "size_pct": 20},   # ethos must block this
+        {"symbol": "TSLA", "direction": "long", "size_pct": 20},   # not a commodity -> ignored
     ]}))
     res = eng.cycle()
     assert not res["halted"]
     pos = eng.broker.positions()
     assert "COCOA" in pos and pos["COCOA"].units > 0
-    assert "GFI" not in pos
+    assert "TSLA" not in pos
     assert eng.journal.tail(1)[0]["kind"] == "cycle"
     exposure = eng.country_exposure()
     assert "CI" in exposure or "GH" in exposure

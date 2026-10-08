@@ -1,6 +1,6 @@
 from sankofa.signals.base import Signal, SignalSet
 from sankofa.strategy.combiner import Combiner
-from sankofa.universe import load_universe
+from sankofa.universe import AfricaLink, Instrument, Universe, load_universe
 from tests.conftest import ROOT
 
 W = {"weights": {"copytrade": 0.5, "sentiment": 0.25, "macro": 0.25},
@@ -32,16 +32,24 @@ def test_producer_aligned_long_is_boosted():
     assert any("producer-aligned" in n for n in t["COCOA"].ethos_notes)
 
 
-def test_short_african_equity_is_blocked():
-    t = _targets([Signal("copytrade", "GFI", -0.9)])
-    assert t["GFI"].conviction == 0.0
+def _synthetic_universe():
+    link = AfricaLink(("ZA",), "test", True)
+    return Universe({
+        "GFI": Instrument("GFI", "miner", "equity", "GFI", {}, link, ()),
+        "USDZAR": Instrument("USDZAR", "rand", "fx", "ZAR=X", {}, AfricaLink(("ZA",), "t", False), ()),
+    }, {})
 
 
-def test_long_usdzar_is_blocked_but_short_allowed():
-    t = _targets([Signal("copytrade", "USDZAR", 0.9), Signal("macro", "USDZAR", 0.5)])
-    assert t["USDZAR"].conviction == 0.0
-    t2 = _targets([Signal("copytrade", "USDZAR", -0.9)])
-    assert t2["USDZAR"].conviction < 0
+def test_equity_and_currency_rules_still_work_if_universe_grows():
+    """The shipped universe is commodities-only, but the rules stay available."""
+    uni = _synthetic_universe()
+    def targets(sigs):
+        s = SignalSet()
+        s.add(*sigs)
+        return {t.instrument.id: t for t in Combiner(uni, W, E).combine(s)}
+    assert targets([Signal("copytrade", "GFI", -0.9)])["GFI"].conviction == 0.0
+    assert targets([Signal("copytrade", "USDZAR", 0.9)])["USDZAR"].conviction == 0.0
+    assert targets([Signal("copytrade", "USDZAR", -0.9)])["USDZAR"].conviction < 0
 
 
 def test_food_shock_sentiment_leg_removed_on_staples():

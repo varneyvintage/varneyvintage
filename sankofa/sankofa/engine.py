@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-import os
 import signal as os_signal
 import time
 from collections import defaultdict
@@ -16,7 +15,7 @@ from .journal import Journal
 from .signals.base import SignalSet
 from .signals.copytrade import LeaderBook, start_webhook_server
 from .signals.macro import MacroRegime
-from .signals.news import GoogleNewsCollector, RSSCollector, XCollector
+from .signals.news import GoogleNewsCollector, RedditCollector, RSSCollector
 from .signals.sentiment import SentimentScorer
 from .signals.trend import TrendSource
 from .strategy.combiner import Combiner
@@ -51,9 +50,6 @@ class Engine:
         name = self.s.broker_name()
         if not self.s.is_live or name == "paper":
             return PaperBroker(self.s.state_dir / "paper_account.json", self.s.starting_equity)
-        if name == "alpaca":
-            from .execution.alpaca import AlpacaBroker
-            return AlpacaBroker(paper=(os.environ.get("ALPACA_PAPER", "true").lower() == "true"))
         if name == "ibkr":
             from .execution.ibkr import IBKRBroker
             return IBKRBroker()
@@ -74,11 +70,9 @@ class Engine:
             items += RSSCollector(sc["rss_feeds"], hours).collect()
         if sc.get("google_news_queries"):
             items += GoogleNewsCollector(sc["google_news_queries"], hours).collect()
-        xc = sc.get("x", {})
-        token = os.environ.get("X_BEARER_TOKEN", "")
-        if xc.get("enabled") and token:
-            items += XCollector(token, xc.get("queries", []), xc.get("max_results_per_query", 50),
-                                xc.get("boosted_accounts"), hours).collect()
+        rc = sc.get("reddit", {})
+        if rc.get("enabled"):
+            items += RedditCollector(rc, hours).collect()
         return items
 
     def collect_signals(self) -> SignalSet:

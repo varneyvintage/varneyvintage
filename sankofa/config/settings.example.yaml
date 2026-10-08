@@ -35,11 +35,8 @@ ethos:
   # Tilt: when a signal is long on something whose rally benefits African producers
   # (cocoa, coffee, gold, PGMs, copper, crude), scale conviction up by this factor.
   producer_aligned_long_boost: 1.25
-  # Never short the equity of African-domiciled companies or Africa ETFs.
-  no_short_african_equities: true
-  # Never take a position that profits from an African currency weakening
-  # (i.e. no LONG USDZAR). Set false if you want pure alpha.
-  no_short_african_currencies: true
+  # (The universe is commodity futures only, so the equity/currency rules the code also
+  # supports - no_short_african_equities, no_short_african_currencies - have nothing to act on.)
   # Food staples: do not go LONG grains purely on a food-shock headline
   # (profiting from African hunger is excluded by design). Technical/copy signals still allowed.
   no_long_staples_on_food_shock_sentiment: true
@@ -91,7 +88,7 @@ copytrade:
 
 # ----------------------------------------------------------------------------
 # Sentiment / news. RSS is free and reliable. Google News RSS search lets you build
-# a per-topic "scraper" without an API key. X/Twitter is optional and PAID.
+# a per-topic "scraper" without an API key. Reddit is the social source.
 # ----------------------------------------------------------------------------
 sentiment:
   engine: vader                  # vader | finbert (finbert needs the [nlp] extra and a GPU-less patience)
@@ -107,18 +104,30 @@ sentiment:
     - "platinum South Africa mining"
     - "copper DRC Zambia mining"
     - "Nigeria oil production OPEC"
-    - "South African rand SARB"
     - "gold mining Ghana Mali"
     - "Africa commodities"
-  x:
-    enabled: false
-    queries:
-      - "(cocoa OR cacao) (Ghana OR Ivory Coast OR Cote d'Ivoire) -is:retweet lang:en"
-      - "(platinum OR PGM) South Africa -is:retweet lang:en"
-      - "(copper OR cobalt) (DRC OR Zambia OR Congo) -is:retweet lang:en"
-    max_results_per_query: 50
-    # Accounts whose posts count 3x (set to handles you actually trust).
-    boosted_accounts: []
+  reddit:
+    enabled: true
+    # Mode "public" uses reddit.com's JSON endpoints with no credentials (rate-limited to
+    # roughly 10 requests/minute unauthenticated - verify; the bot stays under that).
+    # Mode "praw" uses the official API via a free "script" app from reddit.com/prefs/apps;
+    # set REDDIT_CLIENT_ID / REDDIT_CLIENT_SECRET in .env. Reddit's data-API terms changed in
+    # 2023; check the current free-tier limits before scaling this up.
+    mode: public
+    subreddits: [commodities, Commodities, investing, economy, Gold, oil, energy, agriculture,
+                 africa, Nigeria, southafrica, Ghana, Kenya, Ethiopia]
+    # Searched across all of Reddit (last 24h) in addition to the subreddit feeds.
+    search_queries:
+      - "cocoa Ghana OR Ivory Coast"
+      - "platinum South Africa"
+      - "copper DRC OR Zambia OR Congo"
+      - "Nigeria oil OPEC"
+      - "Ethiopia coffee"
+    posts_per_source: 50
+    include_comments: false      # praw mode only: also score the top comments of each post
+    min_score: 1                 # ignore posts with upvote score below this
+    # Users whose posts count 3x (handles you actually trust).
+    boosted_users: []
 
 # ----------------------------------------------------------------------------
 # Macro regime.
@@ -128,9 +137,6 @@ macro:
   # Instruments get a macro score from their class exposure to: USD strength, rates, risk appetite.
   class_betas:
     futures:  { usd_strength: -0.6, us_rates: -0.3, risk_appetite: 0.3 }
-    fx:       { usd_strength:  0.8, us_rates:  0.4, risk_appetite: -0.6 }   # for USDZAR (USD long)
-    etf:      { usd_strength: -0.5, us_rates: -0.4, risk_appetite: 0.8 }
-    equity:   { usd_strength: -0.5, us_rates: -0.4, risk_appetite: 0.8 }
 
 alerts:
   telegram: false

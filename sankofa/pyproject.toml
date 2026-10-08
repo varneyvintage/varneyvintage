@@ -21,9 +21,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-alpaca = ["alpaca-py>=0.20"]
 ibkr = ["ib_async>=1.0"]
-x = ["tweepy>=4.14"]
+reddit = ["praw>=7.7"]
 webhook = ["fastapi>=0.110", "uvicorn>=0.29"]
 nlp = ["transformers>=4.40", "torch>=2.2"]
 dev = ["pytest>=8.0", "ruff>=0.4"]

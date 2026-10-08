@@ -16,12 +16,12 @@ def _uni():
 
 
 def test_sizing_respects_position_cap(tmp_path):
-    rm = RiskManager(RISK, tmp_path / "r.json", 25_000)
-    gfi = _uni().get("GFI")
-    t = Target(gfi, 1.0, 1.0, {})
-    units, stop = rm.desired_units(t, Bar(close=20.0, high=20.5, low=19.5, atr=0.2), 25_000)
-    assert units > 0 and stop < 20.0
-    assert units * 20.0 <= 25_000 * 0.30 + 20.0
+    rm = RiskManager(RISK, tmp_path / "r.json", 250_000)
+    cocoa = _uni().get("COCOA")  # multiplier 10 -> $70k notional per contract at 7000
+    t = Target(cocoa, 1.0, 1.0, {})
+    units, stop = rm.desired_units(t, Bar(close=7000.0, high=7100.0, low=6900.0, atr=50.0), 250_000)
+    assert units >= 1 and stop < 7000.0
+    assert units * 70_000 <= 250_000 * 0.30 + 70_000
 
 
 def test_low_conviction_is_zero(tmp_path):
@@ -50,12 +50,12 @@ def test_paper_broker_round_trip_and_persistence(tmp_path):
     uni = _uni()
     p = tmp_path / "acct.json"
     b = PaperBroker(p, 10_000, slippage_bps=0)
-    gfi = uni.get("GFI")
-    b.mark({"GFI": 20.0})
-    b.trade_to(gfi, 100, 20.0, 18.0, "open")
-    b.mark({"GFI": 25.0})
+    gold = uni.get("GOLD")  # multiplier 100
+    b.mark({"GOLD": 2400.0})
+    b.trade_to(gold, 1, 2400.0, 2300.0, "open")
+    b.mark({"GOLD": 2405.0})
     assert abs(b.equity() - 10_500) < 1e-6
-    b.trade_to(gfi, 0, 25.0, None, "close")
+    b.trade_to(gold, 0, 2405.0, None, "close")
     assert abs(b.cash - 10_500) < 1e-6 and b.positions() == {}
     b2 = PaperBroker(p, 10_000)
     assert abs(b2.cash - 10_500) < 1e-6

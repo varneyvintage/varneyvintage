@@ -16,8 +16,8 @@ def test_keyword_tagging_maps_to_instruments():
 
 def test_short_keyword_needs_word_boundary():
     idx = _uni().keyword_index()
-    # 'zar' must not match inside 'bazaar'
-    assert "USDZAR" not in tag_instruments("the bazaar was busy", idx)
+    # 'gold' must not match inside 'marigold'
+    assert "GOLD" not in tag_instruments("marigolds bloomed in the garden", idx)
 
 
 def test_supply_shock_pushes_commodity_score_up():
@@ -48,9 +48,8 @@ def test_bumper_harvest_is_bearish_for_price():
     assert sigs["COCOA"].score < 0
 
 
-def test_equity_sentiment_is_not_inverted():
+def test_mine_disruption_is_bullish_for_the_metal():
     sc = SentimentScorer(_uni(), "vader", min_mentions=1)
     sigs = {s.instrument_id: s for s in sc.score_items(
         [TextItem("Gold Fields shares slump after strike disruption at Tarkwa mine", "t")])}
-    assert sigs["GFI"].score < 0           # equity: bad news is bad
-    assert sigs["GOLD"].score > 0          # the metal: supply disruption is bullish
+    assert sigs["GOLD"].score > 0
